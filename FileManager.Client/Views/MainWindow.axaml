@@ -1,0 +1,164 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FileManager.Client.ViewModels"
+        xmlns:models="using:FileManager.Client.Models"
+        x:Class="FileManager.Client.Views.MainWindow"
+        Title="Файловый Менеджер" Width="1050" Height="650"
+        WindowStartupLocation="CenterScreen"
+        Background="#0B132B">
+
+    <Window.Resources>
+        <!-- Неоново-синяя палитра с макета -->
+        <SolidColorBrush x:Key="BgDark" Color="#0B132B"/>
+        <SolidColorBrush x:Key="PanelBg" Color="#1C2541"/>
+        <SolidColorBrush x:Key="SidebarBg" Color="#111B34"/>
+        <SolidColorBrush x:Key="AccentCyan" Color="#3A86FF"/>
+        <SolidColorBrush x:Key="AccentGlow" Color="#00B4D8"/>
+        <SolidColorBrush x:Key="TextMain" Color="#E0E6ED"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#5C6B73"/>
+        <SolidColorBrush x:Key="BorderColor" Color="#1D3557"/>
+    </Window.Resources>
+
+    <Window.Styles>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="#1C2541"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2A385B"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentCyan}"/>
+            <Setter Property="TextBlock.Foreground" Value="{StaticResource AccentGlow}"/>
+        </Style>
+
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#111B34"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="8,5"/>
+        </Style>
+
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1C2541"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2A385B"/>
+        </Style>
+    </Window.Styles>
+
+    <Design.DataContext>
+        <vm:MainViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto, *, Auto" Margin="8">
+        <!-- Верхняя панель управления -->
+        <Border Grid.Row="0" Background="{StaticResource PanelBg}" 
+                CornerRadius="10" Padding="8" Margin="0,0,0,8"
+                BorderBrush="{StaticResource BorderColor}" BorderThickness="1">
+            <Grid ColumnDefinitions="Auto, *, 250">
+                <!-- Навигация и действия -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                    <Button Content="⬆ Наверх" Command="{Binding NavigateUp}"/>
+                    <Button Content="🔄 Обновить" Command="{Binding RefreshCommand}"/>
+                    <Button Content="☁ Отправить файл на сервер" Command="{Binding UploadCommand}" 
+                            Background="#0F5257" Foreground="#00F5D4" BorderBrush="#00B4D8"/>
+                </StackPanel>
+
+                <!-- Адресная строка -->
+                <TextBox Grid.Column="1" Margin="10,0" 
+                         Text="{Binding CurrentPath, Mode=TwoWay}" 
+                         IsReadOnly="{Binding IsServerFolder}"
+                         VerticalAlignment="Center"/>
+
+                <!-- Поиск по маске -->
+                <TextBox Grid.Column="2" 
+                         Text="{Binding SearchPattern}" 
+                         PlaceholderText="🔍 Поиск (*.png, *.pdf)..."/>
+            </Grid>
+        </Border>
+
+        <!-- Основная область -->
+        <Grid Grid.Row="1" ColumnDefinitions="230, 8, *">
+            <!-- Левая панель -->
+            <Border Grid.Column="0" Background="{StaticResource SidebarBg}" 
+                    CornerRadius="10" Padding="8"
+                    BorderBrush="{StaticResource BorderColor}" BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="СЕТЬ" Foreground="{StaticResource AccentGlow}" FontSize="11" FontWeight="Bold" Margin="4,2,0,2"/>
+                        <Button Content="☁ Сетевое хранилище" HorizontalAlignment="Stretch" Command="{Binding OpenServerFolderCommand}" Background="#1D3557" Foreground="{StaticResource AccentGlow}"/>
+
+                        <Separator Margin="0,4" Background="{StaticResource BorderColor}"/>
+
+                        <TextBlock Text="БЫСТРЫЙ ДОСТУП" Foreground="{StaticResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="4,2,0,2"/>
+                        <Button Content="🖥 Рабочий стол" HorizontalAlignment="Stretch" Command="{Binding OpenDesktopCommand}"/>
+                        <Button Content="📥 Загрузки" HorizontalAlignment="Stretch" Command="{Binding OpenDownloadsCommand}"/>
+                        <Button Content="📄 Документы" HorizontalAlignment="Stretch" Command="{Binding OpenDocumentsCommand}"/>
+                        <Button Content="🖼 Изображения" HorizontalAlignment="Stretch" Command="{Binding OpenPicturesCommand}"/>
+
+                        <Separator Margin="0,4" Background="{StaticResource BorderColor}"/>
+
+                        <TextBlock Text="ДИСКИ И НАКОПИТЕЛИ" Foreground="{StaticResource TextMuted}" FontSize="11" FontWeight="Bold" Margin="4,2,0,2"/>
+                        
+                        <!-- Динамический список локальных дисков -->
+                        <ItemsControl ItemsSource="{Binding Drives}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Name}" 
+                                            HorizontalAlignment="Stretch" 
+                                            Margin="0,2"
+                                            Command="{Binding $parent[Window].DataContext.OpenDrive}" 
+                                            CommandParameter="{Binding Path}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Background="Transparent"/>
+
+            <!-- Таблица файлов -->
+            <Border Grid.Column="2" Background="{StaticResource PanelBg}" 
+                    CornerRadius="10" Padding="6"
+                    BorderBrush="{StaticResource BorderColor}" BorderThickness="1">
+                <ListBox ItemsSource="{Binding FilteredFiles}" 
+                         SelectedItem="{Binding SelectedFile}"
+                         DoubleTapped="OnListBoxDoubleTapped">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="8,6" CornerRadius="6" Background="Transparent">
+                                <Grid ColumnDefinitions="*, 120, 160">
+                                    <TextBlock Grid.Column="0" Text="{Binding OriginalName}" Foreground="{StaticResource TextMain}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding FormattedSize}" Foreground="{StaticResource AccentGlow}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding DateUploaded, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+        </Grid>
+
+        <!-- Нижний статус-бар -->
+        <Border Grid.Row="2" Background="{StaticResource PanelBg}" 
+                CornerRadius="8" Padding="10,4" Margin="0,8,0,0"
+                BorderBrush="{StaticResource BorderColor}" BorderThickness="1">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource AccentGlow}" FontSize="12"/>
+        </Border>
+    </Grid>
+</Window>

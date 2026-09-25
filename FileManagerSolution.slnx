@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FileManager.Client/FileManager.Client.csproj" />
+  <Project Path="FileManager.Server/FileManager.Server.csproj" />
+</Solution>
