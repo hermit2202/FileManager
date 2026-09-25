@@ -9,6 +9,9 @@ using FileManager.Client.Models;
 
 namespace FileManager.Client.Services;
 
+/// <summary>
+/// HTTP-клиент для взаимодействия с REST API сервера файлового менеджера.
+/// </summary>
 public class ApiClient
 {
     private readonly HttpClient _httpClient = new()
@@ -16,14 +19,18 @@ public class ApiClient
         BaseAddress = new Uri("http://localhost:5191/")
     };
 
-    // 1. Получение списка всех файлов
+    /// <summary>
+    /// Запрашивает у сервера список всех сохранённых файлов.
+    /// </summary>
     public async Task<List<FileItem>> GetFilesAsync()
     {
         var response = await _httpClient.GetFromJsonAsync<List<FileItem>>("api/files");
         return response ?? new List<FileItem>();
     }
 
-    // 2. Загрузка файла на сервер
+    /// <summary>
+    /// Загружает локальный файл с диска на сервер.
+    /// </summary>
     public async Task<bool> UploadFileAsync(string filePath)
     {
         if (!File.Exists(filePath)) return false;
@@ -38,13 +45,14 @@ public class ApiClient
         return response.IsSuccessStatusCode;
     }
 
-    // 3. Скачивание и открытие файла во внешнем приложении ОС
+    /// <summary>
+    /// Скачивает файл с сервера во временную папку и запускает его на клиенте.
+    /// </summary>
     public async Task OpenFileLocallyAsync(FileItem fileItem)
     {
         var response = await _httpClient.GetAsync($"api/files/download/{fileItem.Id}");
         if (!response.IsSuccessStatusCode) return;
-
-        // Сохраняем во временную папку ОС
+        
         var tempFolder = Path.Combine(Path.GetTempPath(), "FileManagerCache");
         if (!Directory.Exists(tempFolder))
             Directory.CreateDirectory(tempFolder);
@@ -52,8 +60,7 @@ public class ApiClient
         var localPath = Path.Combine(tempFolder, fileItem.OriginalName);
         var bytes = await response.Content.ReadAsByteArrayAsync();
         await File.WriteAllBytesAsync(localPath, bytes);
-
-        // Запуск через стандартное приложение ОС
+        
         Process.Start(new ProcessStartInfo
         {
             FileName = localPath,

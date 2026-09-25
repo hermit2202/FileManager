@@ -1,15 +1,14 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using FileManager.Server.Data;
+﻿using FileManager.Server.Data;
 using FileManager.Server.Models;
 using FileManager.Server.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace FileManager.Server.Controllers;
 
+/// <summary>
+/// Контроллер для управления файлами.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class FilesController : ControllerBase
@@ -17,12 +16,18 @@ public class FilesController : ControllerBase
     private readonly AppDbContext _db;
     private readonly FileStorageService _storage;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр контроллера с необходимыми сервисами.
+    /// </summary>
     public FilesController(AppDbContext db, FileStorageService storage)
     {
         _db = db;
         _storage = storage;
     }
 
+    /// <summary>
+    /// Получает список всех файлов, зарегистрированных в системе.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAllFiles()
     {
@@ -30,6 +35,9 @@ public class FilesController : ControllerBase
         return Ok(files);
     }
 
+    /// <summary>
+    /// Загружает файл на сервер и сохраняет его метаданные в базу данных.
+    /// </summary>
     [HttpPost("upload")]
     public async Task<IActionResult> UploadFile(IFormFile file)
     {
@@ -54,6 +62,9 @@ public class FilesController : ControllerBase
         return Ok(dbFile);
     }
 
+    /// <summary>
+    /// Скачивает файл по его уникальному идентификатору.
+    /// </summary>
     [HttpGet("download/{id:guid}")]
     public async Task<IActionResult> DownloadFile(Guid id)
     {
@@ -63,7 +74,8 @@ public class FilesController : ControllerBase
         var path = _storage.GetFilePath(dbFile.StoredName);
         if (!System.IO.File.Exists(path)) return NotFound("Файл не найден на диске");
 
-        var bytes = await System.IO.File.ReadAllBytesAsync(path);
-        return File(bytes, "application/octet-stream", dbFile.OriginalName);
+        var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+        return File(stream, "application/octet-stream", dbFile.OriginalName);
     }
 }

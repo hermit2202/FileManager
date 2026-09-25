@@ -10,7 +10,6 @@ class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        // Указываем ReactiveUI отправлять все изменения свойств и команд в главный UI-поток
         RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
 
         BuildAvaloniaApp()
@@ -20,7 +19,7 @@ class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
-            .UseReactiveUI() // Явно подключаем поддержку ReactiveUI
+            .UseReactiveUI()
             .WithInterFont()
             .LogToTrace();
 }

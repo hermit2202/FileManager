@@ -13,6 +13,10 @@ using ReactiveUI;
 
 namespace FileManager.Client.ViewModels;
 
+/// <summary>
+/// Главная ViewModel приложения. Отвечает за навигацию по локальной файловой системе,
+/// взаимодействие с сетевым хранилищем, управление состоянием UI и обработку команд.
+/// </summary>
 public class MainViewModel : ReactiveObject
 {
     private readonly ApiClient _apiClient = new();
@@ -23,25 +27,68 @@ public class MainViewModel : ReactiveObject
     private FileItem? _selectedFile;
     private string _statusMessage = string.Empty;
 
+    /// <summary>
+    /// Коллекция доступных в системе логических дисков.
+    /// </summary>
     public ObservableCollection<DriveItem> Drives { get; } = new();
+    
+    /// <summary>
+    /// Полный список всех файлов и папок в текущем выбранном каталоге (локальном или сетевом).
+    /// </summary>
     public ObservableCollection<FileItem> AllItems { get; } = new();
+    
+    /// <summary>
+    /// Отфильтрованный список элементов для отображения в пользовательском интерфейсе.
+    /// </summary>
     public ObservableCollection<FileItem> FilteredFiles { get; } = new();
 
-    // Команды для XAML
+    /// <summary>
+    /// Команда обновления содержимого текущей директории.
+    /// </summary>
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
+    
+    /// <summary>
+    /// Команда загрузки выбранного локального файла на сервер.
+    /// </summary>
     public ReactiveCommand<Unit, Task> UploadCommand { get; }
+    
+    /// <summary>
+    /// Команда перехода к сетевому хранилищу.
+    /// </summary>
     public ReactiveCommand<Unit, Unit> OpenServerFolderCommand { get; }
+    
+    /// <summary>
+    /// Команда перехода в папки быстрого доступа (Рабочий стол).
+    /// </summary>
     public ReactiveCommand<Unit, Unit> OpenDesktopCommand { get; }
+    
+    /// <summary>
+    /// Команда перехода в папку "Загрузки".
+    /// </summary>
     public ReactiveCommand<Unit, Unit> OpenDownloadsCommand { get; }
+    
+    /// <summary>
+    /// Команда перехода в папку "Документы".
+    /// </summary>
     public ReactiveCommand<Unit, Unit> OpenDocumentsCommand { get; }
+    
+    /// <summary>
+    /// Команда перехода в папку "Изображения".
+    /// </summary>
     public ReactiveCommand<Unit, Unit> OpenPicturesCommand { get; }
 
+    /// <summary>
+    /// Флаг, указывающий, находится ли пользователь в сетевом хранилище или на локальном диске.
+    /// </summary>
     public bool IsServerFolder
     {
         get => _isServerFolder;
         set => this.RaiseAndSetIfChanged(ref _isServerFolder, value);
     }
 
+    /// <summary>
+    /// Текущий отображаемый путь к локальной или сетевой папке.
+    /// </summary>
     public string CurrentPath
     {
         get => _currentPath;
@@ -55,6 +102,9 @@ public class MainViewModel : ReactiveObject
         }
     }
 
+    /// <summary>
+    /// Шаблон/строка поиска для фильтрации текущего списка файлов.
+    /// </summary>
     public string SearchPattern
     {
         get => _searchPattern;
@@ -65,24 +115,31 @@ public class MainViewModel : ReactiveObject
         }
     }
 
+    /// <summary>
+    /// Текущий выбранный элемент (файл или папка) в списке.
+    /// </summary>
     public FileItem? SelectedFile
     {
         get => _selectedFile;
         set => this.RaiseAndSetIfChanged(ref _selectedFile, value);
     }
 
+    /// <summary>
+    /// Текст сообщения для строки состояния в нижней части окна.
+    /// </summary>
     public string StatusMessage
     {
         get => _statusMessage;
         set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр <see cref="MainViewModel"/>, загружает список дисков и настраивает команды UI.
+    /// </summary>
     public MainViewModel()
     {
-        // Загрузка динамического списка дисков
         LoadDrives();
 
-        // Инициализация команд
         RefreshCommand = ReactiveCommand.Create(() =>
         {
             if (IsServerFolder)
@@ -98,7 +155,6 @@ public class MainViewModel : ReactiveObject
         UploadCommand = ReactiveCommand.Create(async () => await UploadSelectedToFolderAsync());
         OpenServerFolderCommand = ReactiveCommand.Create(() => { _ = OpenServerFolderAsync(); });
 
-        // Быстрый доступ с гарантированным сбросом флага IsServerFolder
         OpenDesktopCommand = ReactiveCommand.Create(() => { SetFolder(Environment.SpecialFolder.Desktop); });
         OpenDownloadsCommand = ReactiveCommand.Create(() => 
         { 
@@ -109,10 +165,12 @@ public class MainViewModel : ReactiveObject
         OpenDocumentsCommand = ReactiveCommand.Create(() => { SetFolder(Environment.SpecialFolder.MyDocuments); });
         OpenPicturesCommand = ReactiveCommand.Create(() => { SetFolder(Environment.SpecialFolder.MyPictures); });
 
-        // Начальная папка при запуске
         CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     }
 
+    /// <summary>
+    /// Сканирует систему и обновляет коллекцию доступных готовых к работе дисков.
+    /// </summary>
     public void LoadDrives()
     {
         Drives.Clear();
@@ -137,12 +195,18 @@ public class MainViewModel : ReactiveObject
         catch { }
     }
 
+    /// <summary>
+    /// Переходит в корень указанного диска.
+    /// </summary>
     public void OpenDrive(string drivePath)
     {
         IsServerFolder = false;
         CurrentPath = drivePath;
     }
 
+    /// <summary>
+    /// Асинхронно считывает файлы и папки из локальной директории в фоновом потоке и обновляет UI.
+    /// </summary>
     public void LoadDirectoryContent(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
@@ -158,7 +222,6 @@ public class MainViewModel : ReactiveObject
                 var dirInfo = new DirectoryInfo(path);
                 var tempItems = new List<FileItem>();
 
-                // Чтение каталогов
                 try
                 {
                     foreach (var dir in dirInfo.GetDirectories())
@@ -184,7 +247,6 @@ public class MainViewModel : ReactiveObject
                 }
                 catch { }
 
-                // Чтение файлов
                 try
                 {
                     foreach (var file in dirInfo.GetFiles())
@@ -209,7 +271,6 @@ public class MainViewModel : ReactiveObject
                 }
                 catch { }
 
-                // Безопасный вывод в UI-поток
                 Dispatcher.UIThread.Post(() =>
                 {
                     IsServerFolder = false;
@@ -229,7 +290,10 @@ public class MainViewModel : ReactiveObject
             }
         });
     }
-
+    
+    /// <summary>
+    /// Запрашивает список файлов с удалённого сервера ASP.NET Core и переключает интерфейс в режим сетевой папки.
+    /// </summary>
     public async Task OpenServerFolderAsync()
     {
         try
@@ -275,7 +339,10 @@ public class MainViewModel : ReactiveObject
             });
         }
     }
-
+    
+    /// <summary>
+    /// Загружает выделенный в данный момент локальный файл на удалённый сервер.
+    /// </summary>
     public async Task UploadSelectedToFolderAsync()
     {
         if (SelectedFile == null || SelectedFile.IsDirectory || SelectedFile.IsServerFile)
@@ -304,6 +371,10 @@ public class MainViewModel : ReactiveObject
         }
     }
 
+    /// <summary>
+    /// Фильтрует список <see cref="AllItems"/> по введенному шаблону <see cref="SearchPattern"/>
+    /// и обновляет <see cref="FilteredFiles"/>.
+    /// </summary>
     public void ApplyFilter()
     {
         Dispatcher.UIThread.Post(() =>
@@ -330,9 +401,11 @@ public class MainViewModel : ReactiveObject
         });
     }
 
+    /// <summary>
+    /// Выполняет переход на один уровень вверх в дереве каталогов или возвращает на ПК из сетевой папки.
+    /// </summary>
     public void NavigateUp()
     {
-        // Переход из сетевого хранилища обратно на ПК
         if (IsServerFolder)
         {
             IsServerFolder = false;
@@ -349,6 +422,10 @@ public class MainViewModel : ReactiveObject
         }
     }
 
+    /// <summary>
+    /// Открывает выбранную папку, запускает локальный файл связанным приложением
+    /// или скачивает и открывает сетевой файл с сервера.
+    /// </summary>
     public async Task OpenSelectedAsync()
     {
         if (SelectedFile == null) return;
@@ -382,7 +459,7 @@ public class MainViewModel : ReactiveObject
             }
         }
     }
-
+    
     private void SetFolder(Environment.SpecialFolder folder)
     {
         IsServerFolder = false;

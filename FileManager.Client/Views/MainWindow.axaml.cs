@@ -4,8 +4,16 @@ using FileManager.Client.ViewModels;
 
 namespace FileManager.Client.Views;
 
+/// <summary>
+/// Главное окно пользовательского интерфейса приложения.
+/// Связывает XAML-разметку представление (View) с логикой ViewModel и обрабатывает события ввода.
+/// </summary>
 public partial class MainWindow : Window
 {
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="MainWindow"/>
+    /// и связывает контекст данных (DataContext) с <see cref="MainViewModel"/>.
+    /// </summary>
     public MainWindow()
     {
         InitializeComponent();
