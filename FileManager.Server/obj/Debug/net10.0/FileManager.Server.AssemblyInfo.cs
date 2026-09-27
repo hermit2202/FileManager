@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FileManager.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+17715ae824e6a1886213f08078d8bd7d2edb16ef")]
 [assembly: System.Reflection.AssemblyProductAttribute("FileManager.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FileManager.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

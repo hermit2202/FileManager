@@ -377,28 +377,34 @@ public class MainViewModel : ReactiveObject
     /// </summary>
     public void ApplyFilter()
     {
-        Dispatcher.UIThread.Post(() =>
+        FilteredFiles.Clear();
+        var query = AllItems.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(SearchPattern))
         {
-            FilteredFiles.Clear();
-            var query = AllItems.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SearchPattern))
+            string pattern = SearchPattern.Trim().ToLower();
+            query = query.Where(item =>
             {
-                string pattern = SearchPattern.Trim().ToLower();
-                query = query.Where(item =>
-                {
-                    string name = item.OriginalName.ToLower();
-                    if (pattern.StartsWith("*"))
-                        return name.EndsWith(pattern.TrimStart('*'));
-                    return name.Contains(pattern);
-                });
-            }
+                string name = item.OriginalName.ToLower();
+                if (pattern.StartsWith("*"))
+                    return name.EndsWith(pattern.TrimStart('*'));
+                return name.Contains(pattern);
+            });
+        }
 
-            foreach (var item in query)
-            {
-                FilteredFiles.Add(item);
-            }
-        });
+        foreach (var item in query)
+        {
+            FilteredFiles.Add(item);
+        }
+
+        if (IsServerFolder)
+        {
+            StatusMessage = $"Сетевая папка | Файлов на сервере: {FilteredFiles.Count}";
+        }
+        else
+        {
+            StatusMessage = $"Локальная папка: {CurrentPath} | Элементов: {FilteredFiles.Count}";
+        }
     }
 
     /// <summary>

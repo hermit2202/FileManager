@@ -67,3 +67,4 @@ C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Server\obj
 C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Server\obj\Debug\net10.0\FileManager.Server.pdb
 C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Server\obj\Debug\net10.0\FileManager.Server.genruntimeconfig.cache
 C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Server\obj\Debug\net10.0\ref\FileManager.Server.dll
+C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Server\obj\Debug\net10.0\FileManager.Server.sourcelink.json

@@ -91,3 +91,4 @@ C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Client\obj
 C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Client\obj\Debug\net10.0\FileManager.Client.pdb
 C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Client\obj\Debug\net10.0\FileManager.Client.genruntimeconfig.cache
 C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Client\obj\Debug\net10.0\ref\FileManager.Client.dll
+C:\Users\Георгий\RiderProjects\FileManagerSolution\FileManager.Client\obj\Debug\net10.0\FileManager.Client.sourcelink.json
