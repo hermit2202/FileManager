@@ -74,7 +74,30 @@ public class FilesController : ControllerBase
         var path = _storage.GetFilePath(dbFile.StoredName);
         if (!System.IO.File.Exists(path)) return NotFound("Файл не найден на диске");
 
-        // Использование PhysicalFile позволит ASP.NET Core правильно закрыть файл после скачивания
         return PhysicalFile(path, "application/octet-stream", dbFile.OriginalName);
+    }
+
+    /// <summary>
+    /// Удаляет файл из базы данных и физического хранилища по его уникальному идентификатору.
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteFile(Guid id)
+    {
+        var dbFile = await _db.Files.FindAsync(id);
+        if (dbFile == null)
+        {
+            return NotFound("Файл не найден в базе данных");
+        }
+
+        bool isDeletedFromStorage = _storage.DeleteFile(dbFile.StoredName);
+        if (!isDeletedFromStorage)
+        {
+            return StatusCode(500, "Не удалось удалить файл с диска. Проверьте права доступа к сетевому хранилищу или не открыт ли файл в другой программе.");
+        }
+
+        _db.Files.Remove(dbFile);
+        await _db.SaveChangesAsync();
+
+        return Ok(new { message = $"Файл '{dbFile.OriginalName}' успешно удалён" });
     }
 }
