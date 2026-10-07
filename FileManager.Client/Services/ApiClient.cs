@@ -67,4 +67,32 @@ public class ApiClient
             UseShellExecute = true
         });
     }
+    
+    /// <summary>
+    /// Отправляет DELETE-запрос на сервер для удаления файла по его ID (Guid).
+    /// </summary>
+    public async Task<bool> DeleteFileAsync(Guid? fileId)
+    {
+        if (fileId == null) return false;
+
+        try
+        {
+            // Внимание: проверьте наличие / в начале или конце BaseAddress
+            var response = await _httpClient.DeleteAsync($"api/files/{fileId}");
+        
+            // Полезно для отладки:
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorText = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"[DELETE ERROR] Code: {response.StatusCode}, Details: {errorText}");
+            }
+
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DELETE EXCEPTION] {ex.Message}");
+            return false;
+        }
+    }
 }

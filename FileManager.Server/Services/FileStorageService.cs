@@ -1,7 +1,7 @@
 ﻿namespace FileManager.Server.Services;
 
 /// <summary>
-/// Сервис для физического сохранения и чтения файлов на диске сервера.
+/// Сервис для физического сохранения, чтения и удаления файлов на диске сервера.
 /// </summary>
 public class FileStorageService
 {
@@ -17,7 +17,7 @@ public class FileStorageService
     }
 
     /// <summary>
-    /// Асинхронное сохраняет загруженный файл на диск сервера.
+    /// Асинхронно сохраняет загруженный файл на диск сервера.
     /// </summary>
     public async Task<string> SaveFileAsync(IFormFile file, string storedName)
     {
@@ -28,10 +28,32 @@ public class FileStorageService
     }
 
     /// <summary>
-    /// Возвращает полный физический путь к файлу в хранилища.
+    /// Возвращает полный физический путь к файлу в хранилище.
     /// </summary>
     public string GetFilePath(string storedName)
     {
         return Path.Combine(_storagePath, storedName);
+    }
+
+    /// <summary>
+    /// Удаляет файл из физического хранилища на диске, если он существует.
+    /// </summary>
+    /// <param name="storedName">Уникальное имя сохранённого файла.</param>
+    /// <returns>True, если файл успешно удалён или отсутствовал; иначе False.</returns>
+    public bool DeleteFile(string storedName)
+    {
+        try
+        {
+            var filePath = GetFilePath(storedName);
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

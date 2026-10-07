@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Георгий\\RiderProjects\\FileManagerSolution\\FileManager.Client\\FileManager.Client.csproj": {}
+    "C:\\Users\\Георгий\\RiderProjects\\FileManager\\FileManager.Client\\FileManager.Client.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Георгий\\RiderProjects\\FileManagerSolution\\FileManager.Client\\FileManager.Client.csproj": {
+    "C:\\Users\\Георгий\\RiderProjects\\FileManager\\FileManager.Client\\FileManager.Client.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Георгий\\RiderProjects\\FileManagerSolution\\FileManager.Client\\FileManager.Client.csproj",
+        "projectUniqueName": "C:\\Users\\Георгий\\RiderProjects\\FileManager\\FileManager.Client\\FileManager.Client.csproj",
         "projectName": "FileManager.Client",
-        "projectPath": "C:\\Users\\Георгий\\RiderProjects\\FileManagerSolution\\FileManager.Client\\FileManager.Client.csproj",
+        "projectPath": "C:\\Users\\Георгий\\RiderProjects\\FileManager\\FileManager.Client\\FileManager.Client.csproj",
         "packagesPath": "C:\\Users\\Георгий\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Георгий\\RiderProjects\\FileManagerSolution\\FileManager.Client\\obj\\",
+        "outputPath": "C:\\Users\\Георгий\\RiderProjects\\FileManager\\FileManager.Client\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

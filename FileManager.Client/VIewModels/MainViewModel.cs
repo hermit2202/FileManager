@@ -51,6 +51,11 @@ public class MainViewModel : ReactiveObject
     /// Команда загрузки выбранного локального файла на сервер.
     /// </summary>
     public ReactiveCommand<Unit, Task> UploadCommand { get; }
+
+    /// <summary>
+    /// Команда удаления выбранного локального или сетевого файла/папки.
+    /// </summary>
+    public ReactiveCommand<Unit, Task> DeleteCommand { get; }
     
     /// <summary>
     /// Команда перехода к сетевому хранилищу.
@@ -153,6 +158,8 @@ public class MainViewModel : ReactiveObject
         });
 
         UploadCommand = ReactiveCommand.Create(async () => await UploadSelectedToFolderAsync());
+        DeleteCommand = ReactiveCommand.Create(async () => await DeleteSelectedAsync());
+
         OpenServerFolderCommand = ReactiveCommand.Create(() => { _ = OpenServerFolderAsync(); });
 
         OpenDesktopCommand = ReactiveCommand.Create(() => { SetFolder(Environment.SpecialFolder.Desktop); });
@@ -278,7 +285,6 @@ public class MainViewModel : ReactiveObject
                     foreach (var item in tempItems) AllItems.Add(item);
 
                     ApplyFilter();
-                    StatusMessage = $"Локальная папка: {path} | Элементов: {FilteredFiles.Count}";
                 });
             }
             catch (Exception ex)
@@ -328,7 +334,6 @@ public class MainViewModel : ReactiveObject
                 }
 
                 ApplyFilter();
-                StatusMessage = $"Сетевая папка | Файлов на сервере: {FilteredFiles.Count}";
             });
         }
         catch (Exception ex)
@@ -368,6 +373,55 @@ public class MainViewModel : ReactiveObject
         catch (Exception ex)
         {
             StatusMessage = $"Ошибка: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Удаляет выбранный файл или папку (локально или с сервера).
+    /// </summary>
+    public async Task DeleteSelectedAsync()
+    {
+        if (SelectedFile == null)
+        {
+            StatusMessage = "Выберите файл или папку для удаления";
+            return;
+        }
+
+        try
+        {
+            if (SelectedFile.IsServerFile)
+            {
+                StatusMessage = $"Удаление файла с сервера: {SelectedFile.OriginalName}...";
+                bool success = await _apiClient.DeleteFileAsync(SelectedFile.Id);
+
+                if (success)
+                {
+                    StatusMessage = $"Файл {SelectedFile.OriginalName} успешно удалён с сервера!";
+                    await OpenServerFolderAsync();
+                }
+                else
+                {
+                    StatusMessage = "Не удалось удалить файл с сервера";
+                }
+            }
+            else
+            {
+                if (SelectedFile.IsDirectory)
+                {
+                    Directory.Delete(SelectedFile.FullPath, true);
+                }
+                else
+                {
+                    File.Delete(SelectedFile.FullPath);
+                }
+
+                StatusMessage = $"Удалено: {SelectedFile.OriginalName}";
+                LoadDirectoryContent(CurrentPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Ошибка при удалении: {ex.Message}";
         }
     }
 
@@ -444,11 +498,18 @@ public class MainViewModel : ReactiveObject
             }
             else
             {
-                Process.Start(new ProcessStartInfo 
-                { 
-                    FileName = SelectedFile.FullPath, 
-                    UseShellExecute = true 
-                });
+                try
+                {
+                    Process.Start(new ProcessStartInfo 
+                    { 
+                        FileName = SelectedFile.FullPath, 
+                        UseShellExecute = true 
+                    });
+                }
+                catch (Exception ex)
+                {
+                    StatusMessage = $"Ошибка при открытии файла: {ex.Message}";
+                }
             }
         }
         else

@@ -74,8 +74,7 @@ public class FilesController : ControllerBase
         var path = _storage.GetFilePath(dbFile.StoredName);
         if (!System.IO.File.Exists(path)) return NotFound("Файл не найден на диске");
 
-        var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-
-        return File(stream, "application/octet-stream", dbFile.OriginalName);
+        // Использование PhysicalFile позволит ASP.NET Core правильно закрыть файл после скачивания
+        return PhysicalFile(path, "application/octet-stream", dbFile.OriginalName);
     }
 }
